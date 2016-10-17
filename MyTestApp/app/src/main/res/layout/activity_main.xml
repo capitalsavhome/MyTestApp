@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
@@ -8,10 +8,46 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
+    android:orientation="vertical"
     tools:context="com.example.admin.mytestapp.MainActivity">
 
     <TextView
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!" />
-</RelativeLayout>
+        android:layout_height="60dp"
+        android:layout_gravity="center_horizontal"
+        android:id="@+id/tvTime"
+        android:text="TEST1"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="60dp"
+        android:layout_gravity="center_horizontal"
+        android:id="@+id/tvCounter"
+        android:text="TEST2"/>
+
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TableRow>
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.5"
+                android:text="@string/btn_start_text"
+                android:id="@+id/btnStart"
+                android:onClick="btnOnClick"
+                android:textSize="10pt"
+                android:background="#4CAF50"
+                android:textColor="#FFFFFF"/>
+            <Button
+                android:layout_width="0dp"
+                android:layout_weight="0.5"
+                android:layout_height="wrap_content"
+                android:text="@string/btn_stop_text"
+                android:id="@+id/btnStop"
+                android:onClick="btnOnClick"
+                android:textSize="10pt"
+                android:background="#D32F2F"
+                android:textColor="#FFFFFF"/>
+        </TableRow>
+    </TableLayout>
+</LinearLayout>
