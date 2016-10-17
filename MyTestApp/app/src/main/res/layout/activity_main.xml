@@ -16,13 +16,15 @@
         android:layout_height="60dp"
         android:layout_gravity="center_horizontal"
         android:id="@+id/tvTime"
-        android:text="TEST1"/>
+        android:text="TEST1"
+        android:layout_weight="1"/>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="60dp"
         android:layout_gravity="center_horizontal"
         android:id="@+id/tvCounter"
-        android:text="TEST2"/>
+        android:text="TEST2"
+        android:layout_weight="1"/>
 
     <TableLayout
         android:layout_width="match_parent"

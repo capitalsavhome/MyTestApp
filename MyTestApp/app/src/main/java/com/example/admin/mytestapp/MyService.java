@@ -9,6 +9,7 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
@@ -21,10 +22,23 @@ public class MyService extends Service {
     private final static String SAVED_COUNTER = "savedCounter";
     private MyThread mThread = new MyThread();
     private boolean mFlag = false;
+    private SharedPreferences mSharedPreferences;
+
+
 
 
     public int onStartCommand(Intent intent, int flags, int startId) {
         if(startId == 1) {
+            Calendar calendar = new GregorianCalendar();
+            calendar.getInstance();
+            String string = new SimpleDateFormat("dd-MM-yyyy--HH:mm:ss").format(calendar.getTime());
+            //Intent newIntent = new Intent(MainActivity.BROADCAST_ACTION);
+            Log.d(Constants.LOG_TAG, string);
+            Intent newIntent = new Intent(MainActivity.SECOND_BROADCAST_ACTION);
+            newIntent.putExtra(MainActivity.EXTRA_TIME, string);
+
+            sendBroadcast(newIntent);
+
             Log.d(Constants.LOG_TAG, "onStartCommand");
             someTask();
         }
@@ -55,7 +69,7 @@ public class MyService extends Service {
     class MyThread extends Thread{
 
         private SharedPreferences mSharedPreferences;
-
+        private Intent mIntent = new Intent(MainActivity.BROADCAST_ACTION);
         private boolean isCalledSave = false;
 
         @Override
@@ -66,6 +80,8 @@ public class MyService extends Service {
                 while (true) {
                     if (mFlag) {
                         count++;
+                        mIntent.putExtra(MainActivity.EXTRA_COUNT, count);
+                        sendBroadcast(mIntent);
                         Log.d(Constants.LOG_TAG, Integer.toString(count));
                         try {
                             Thread.sleep(500);
