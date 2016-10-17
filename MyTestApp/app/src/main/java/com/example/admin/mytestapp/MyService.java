@@ -1,11 +1,16 @@
 package com.example.admin.mytestapp;
 
+import android.app.Activity;
 import android.app.Service;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.icu.util.TimeUnit;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
+
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 /**
  * Created by Admin on 17.10.2016.
@@ -13,13 +18,16 @@ import android.util.Log;
 
 public class MyService extends Service {
 
+    private final static String SAVED_COUNTER = "savedCounter";
     private MyThread mThread = new MyThread();
     private boolean mFlag = false;
-    int i = 0;
+
 
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d(Constants.LOG_TAG, "onStartCommand");
-        someTask();
+        if(startId == 1) {
+            Log.d(Constants.LOG_TAG, "onStartCommand");
+            someTask();
+        }
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -45,19 +53,40 @@ public class MyService extends Service {
     }
 
     class MyThread extends Thread{
+
+        private SharedPreferences mSharedPreferences;
+
+        private boolean isCalledSave = false;
+
         @Override
         public void run() {
-            while (true) {
-                if (mFlag) {
-                    Log.d(Constants.LOG_TAG, Integer.toString(i));
-                    i++;
-                    try {
-                        Thread.sleep(500);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+            mSharedPreferences = getSharedPreferences("MP", MODE_PRIVATE);
+            int count = mSharedPreferences.getInt(SAVED_COUNTER, 0);
+
+                while (true) {
+                    if (mFlag) {
+                        count++;
+                        Log.d(Constants.LOG_TAG, Integer.toString(count));
+                        try {
+                            Thread.sleep(500);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    else {
+                        if (!isCalledSave) {
+                            saveValues(count);
+                            isCalledSave = true;
+                        }
                     }
                 }
-            }
+        }
+
+        private void saveValues(int count) {
+            mSharedPreferences = getSharedPreferences("MP", MODE_PRIVATE);
+            SharedPreferences.Editor editor = mSharedPreferences.edit();
+            editor.putInt(SAVED_COUNTER, count);
+            editor.commit();
         }
     }
 }
