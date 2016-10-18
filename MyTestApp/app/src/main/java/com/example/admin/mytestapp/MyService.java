@@ -19,10 +19,24 @@ import java.util.GregorianCalendar;
 
 public class MyService extends Service {
 
+
     private final static String SAVED_COUNTER = "savedCounter";
     private final static String SAVED_TIME = "savedTime";
+    private final static String SHARED_PREF = "SharedPref";
+
+    /**
+     * Thread for counter
+     */
     private MyThread mThread = new MyThread();
+
+    /**
+     * flag to start/stop thread
+     */
     private boolean mFlag = false;
+
+    /**
+     * SharedPreferences to save time
+     */
     private SharedPreferences mSharedPreferences;
 
 
@@ -31,7 +45,8 @@ public class MyService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         if(startId == 1) {
 
-            mSharedPreferences = getSharedPreferences("MP", MODE_PRIVATE);
+            //initialization of sharedPreferences
+            mSharedPreferences = getSharedPreferences(SHARED_PREF, MODE_PRIVATE);
 
 
             //get current launch time
@@ -44,9 +59,6 @@ public class MyService extends Service {
             editor.putString(SAVED_TIME, string);
             editor.commit();
 
-            Log.d(Constants.LOG_TAG, string);
-
-            Log.d(Constants.LOG_TAG, "onStartCommand");
             someTask();
         }
         return super.onStartCommand(intent, flags, startId);
@@ -54,9 +66,13 @@ public class MyService extends Service {
 
     public void onDestroy() {
         super.onDestroy();
+
+        //if thread not interrupt
         if (!mThread.isInterrupted()) {
+            //interrupt thread
             mThread.interrupt();
         }
+        //set flag false - to stop thread
         mFlag = false;
 
         //get time of last Start
@@ -66,7 +82,6 @@ public class MyService extends Service {
         Intent newIntent = new Intent(MainActivity.SECOND_BROADCAST_ACTION);
         newIntent.putExtra(MainActivity.EXTRA_TIME, time);
         sendBroadcast(newIntent);
-        Log.d(Constants.LOG_TAG, "Thread Interrupt. YEEEES!!!!");
     }
 
     @Nullable
@@ -76,35 +91,62 @@ public class MyService extends Service {
         return null;
     }
 
+    /**
+     * method start thread
+     */
     void someTask() {
+        //set flag true
         mFlag = true;
+        //start thread
         mThread.start();
     }
 
     class MyThread extends Thread{
 
+        private final static String SHARED_PREF_THREAD = "SharedPrefThread";
+
+        /**
+         * SharedPreferences in Thread to save count
+         */
         private SharedPreferences mSharedPreferences;
+
+        /**
+         * intent to send Broadcast messages
+         */
         private Intent mIntent = new Intent(MainActivity.BROADCAST_ACTION);
+
+        /**
+         * show true if method saveValues was called in Thread
+         */
         private boolean isCalledSave = false;
 
         @Override
         public void run() {
-            mSharedPreferences = getSharedPreferences("MP", MODE_PRIVATE);
+            //initialization of sharedPreferences
+            mSharedPreferences = getSharedPreferences(SHARED_PREF_THREAD, MODE_PRIVATE);
+
+            //get last value of counter
             int count = mSharedPreferences.getInt(SAVED_COUNTER, 0);
 
                 while (true) {
+                    //if thread not stop
                     if (mFlag) {
+
                         count++;
+
+                        //send value of counter to mainActivity
                         mIntent.putExtra(MainActivity.EXTRA_COUNT, count);
                         sendBroadcast(mIntent);
                         Log.d(Constants.LOG_TAG, Integer.toString(count));
                         try {
-                            Thread.sleep(500);
+                            Thread.sleep(5000);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
                     }
+                    //if thread stop
                     else {
+                        //make one call method saveValues
                         if (!isCalledSave) {
                             saveValues(count);
                             isCalledSave = true;
@@ -113,8 +155,12 @@ public class MyService extends Service {
                 }
         }
 
+        /**
+         * save values from counter to SharedPreferences
+         * @param count - int counter
+         */
         private void saveValues(int count) {
-            mSharedPreferences = getSharedPreferences("MP", MODE_PRIVATE);
+            mSharedPreferences = getSharedPreferences(SHARED_PREF_THREAD, MODE_PRIVATE);
             SharedPreferences.Editor editor = mSharedPreferences.edit();
             editor.putInt(SAVED_COUNTER, count);
             editor.commit();
