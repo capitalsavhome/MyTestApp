@@ -20,6 +20,7 @@ import java.util.GregorianCalendar;
 public class MyService extends Service {
 
     private final static String SAVED_COUNTER = "savedCounter";
+    private final static String SAVED_TIME = "savedTime";
     private MyThread mThread = new MyThread();
     private boolean mFlag = false;
     private SharedPreferences mSharedPreferences;
@@ -29,15 +30,21 @@ public class MyService extends Service {
 
     public int onStartCommand(Intent intent, int flags, int startId) {
         if(startId == 1) {
+
+            mSharedPreferences = getSharedPreferences("MP", MODE_PRIVATE);
+
+
+            //get current launch time
             Calendar calendar = new GregorianCalendar();
             calendar.getInstance();
             String string = new SimpleDateFormat("dd-MM-yyyy--HH:mm:ss").format(calendar.getTime());
-            //Intent newIntent = new Intent(MainActivity.BROADCAST_ACTION);
-            Log.d(Constants.LOG_TAG, string);
-            Intent newIntent = new Intent(MainActivity.SECOND_BROADCAST_ACTION);
-            newIntent.putExtra(MainActivity.EXTRA_TIME, string);
 
-            sendBroadcast(newIntent);
+            //save current launch time
+            SharedPreferences.Editor editor = mSharedPreferences.edit();
+            editor.putString(SAVED_TIME, string);
+            editor.commit();
+
+            Log.d(Constants.LOG_TAG, string);
 
             Log.d(Constants.LOG_TAG, "onStartCommand");
             someTask();
@@ -51,6 +58,14 @@ public class MyService extends Service {
             mThread.interrupt();
         }
         mFlag = false;
+
+        //get time of last Start
+        String time = mSharedPreferences.getString(SAVED_TIME, "FirstLaunch");
+
+        //send last launch time to MainActivity
+        Intent newIntent = new Intent(MainActivity.SECOND_BROADCAST_ACTION);
+        newIntent.putExtra(MainActivity.EXTRA_TIME, time);
+        sendBroadcast(newIntent);
         Log.d(Constants.LOG_TAG, "Thread Interrupt. YEEEES!!!!");
     }
 
